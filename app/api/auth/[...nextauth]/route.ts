@@ -1,10 +1,28 @@
-import NextAuth from "next-auth";
+import NextAuth, { Session, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { JWT } from "next-auth/jwt";
 
 const prisma = new PrismaClient();
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      role?: string | null;
+    };
+  }
+}
+
+declare module "next-auth" {
+  interface User {
+    role?: string | null;
+  }
+}
 
 const handler = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -33,11 +51,25 @@ const handler = NextAuth({
           throw new Error("Mot de passe incorrect");
         }
 
-        return user;
+        return {id: user.id, name: user.name, email: user.email, role: user.role};
       },
     }),
   ],
   session: { strategy: "jwt" },
+  callbacks: {
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.role = token.role as string | null | undefined;
+      }
+      return session;
+    },
+    async jwt({ token, user }): Promise<JWT> {
+      if (user) {
+        token.role = user.role;
+      }
+      return token;
+    },
+  },
   secret: process.env.NEXTAUTH_SECRET,
 });
 

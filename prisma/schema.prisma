@@ -18,6 +18,13 @@ model User {
   email     String  @unique
   password  String?
   name      String?
+  role      Role    @default(LOCATAIRE)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  LOCATAIRE
+  PROPRIETAIRE
+  ADMINISTRATEUR
 }
