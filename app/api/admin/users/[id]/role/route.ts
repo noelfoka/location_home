@@ -16,7 +16,7 @@ export async function PATCH(request: Request,{params}: {params: {id: string}}) {
 
   const user = await prisma.user.findUnique({
     where: {
-      id: params.id,
+      id: params.id
     },
   });
 

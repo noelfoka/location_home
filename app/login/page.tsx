@@ -24,7 +24,7 @@ export default function Page() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push("/admin");
   };
 
   return (
